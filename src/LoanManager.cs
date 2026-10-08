@@ -38,59 +38,43 @@ public class LoanManager
     {
         LoanResult result = new();
 
-        if (reader != null)
-        {
-            if (!reader.IsBlocked)
-            {
-                if (books != null)
-                {
-                    if (books.Count > 0)
-                    {
-                        if (reader.ActiveLoans < MaximumActiveLoans || reader.Category == "staff")
-                        {
-                            bool canContinue = true;
-                            for (int i = 0; i < books.Count; i++)
-                            {
-                                if (!books[i].IsAvailable || books[i].IsReferenceOnly)
-                                {
-                                    canContinue = false;
-                                }
-                            }
-
-                            if (!canContinue)
-                            {
-                                result.Error = "ERR: book";
-                                return result;
-                            }
-                        }
-                        else
-                        {
-                            result.Error = "ERR: limit";
-                            return result;
-                        }
-                    }
-                    else
-                    {
-                        result.Error = "ERR: empty";
-                        return result;
-                    }
-                }
-                else
-                {
-                    result.Error = "ERR: null-books";
-                    return result;
-                }
-            }
-            else
-            {
-                result.Error = "ERR: blocked";
-                return result;
-            }
-        }
-        else
+        if (reader == null)
         {
             result.Error = "ERR: reader";
             return result;
+        }
+
+        if (reader.IsBlocked)
+        {
+            result.Error = "ERR: blocked";
+            return result;
+        }
+
+        if (books == null)
+        {
+            result.Error = "ERR: null-books";
+            return result;
+        }
+
+        if (books.Count == 0)
+        {
+            result.Error = "ERR: empty";
+            return result;
+        }
+
+        if (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff")
+        {
+            result.Error = "ERR: limit";
+            return result;
+        }
+
+        for (int i = 0; i < books.Count; i++)
+        {
+            if (!books[i].IsAvailable || books[i].IsReferenceOnly)
+            {
+                result.Error = "ERR: book";
+                return result;
+            }
         }
 
         int days = StudentLoanDays;
