@@ -2,6 +2,7 @@ bin/
 obj/
 TestResults/
 .DS_Store
+.idea/
 *.user
 *.suo
 loans.json
