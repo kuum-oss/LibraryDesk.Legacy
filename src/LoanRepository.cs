@@ -5,11 +5,17 @@ namespace LibraryDesk.Legacy;
 public class LoanRepository
 {
     private readonly List<Loan> _loans = new();
+    private readonly string _path;
+
+    public LoanRepository(string? path = null)
+    {
+        _path = path ?? "loans.json";
+    }
 
     public void Save(Loan loan)
     {
         _loans.Add(loan);
-        File.WriteAllText("loans.json", JsonSerializer.Serialize(_loans));
+        File.WriteAllText(_path, JsonSerializer.Serialize(_loans));
     }
 
     public Loan? Find(int id)
@@ -84,7 +90,7 @@ public class LoanRepository
     {
         try
         {
-            File.Delete("loans.json");
+            File.Delete(_path);
         }
         catch
         {

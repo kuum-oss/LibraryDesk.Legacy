@@ -6,10 +6,15 @@ namespace LibraryDesk.Legacy;
 // Клас навмисно зберігає дефекти початкового навчального зрізу.
 public class LoanManager
 {
-    private readonly LoanRepository _repository = new();
+    private readonly LoanRepository _repository;
     private readonly List<string> _log = new();
     private int _nextId = 1;
     private decimal _lastFine;
+
+    public LoanManager(LoanRepository? repository = null)
+    {
+        _repository = repository ?? new LoanRepository();
+    }
 
     public LoanResult Issue(
         Reader? reader,
