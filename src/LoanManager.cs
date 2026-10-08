@@ -19,7 +19,6 @@ public class LoanManager
     private readonly LoanRepository _repository;
     private readonly List<string> _log = new();
     private int _nextId = 1;
-    private decimal _lastFine;
 
     public LoanManager(LoanRepository? repository = null)
     {
@@ -112,23 +111,11 @@ public class LoanManager
         loan.Status = "active";
         loan.CreatedBy = operatorName;
 
-        _lastFine = 0m;
         if (returnedOn != null)
         {
             if (returnedOn.Value.Date > loan.DueOn.Date)
             {
-                int overdueDays = (returnedOn.Value.Date - loan.DueOn.Date).Days;
-                _lastFine = overdueDays * FinePerBookPerDay * books.Count;
-                if (reader.Category == "child")
-                {
-                    _lastFine = _lastFine * ChildFineRate;
-                }
-
-                if (_lastFine > MaximumFine)
-                {
-                    _lastFine = MaximumFine;
-                }
-
+                loan.Fine = PreviewFine(loan, returnedOn.Value);
                 loan.Status = "overdue";
             }
             else
@@ -137,7 +124,6 @@ public class LoanManager
             }
 
             loan.ReturnedOn = returnedOn;
-            loan.Fine = _lastFine;
         }
 
         string receipt = "Видача #" + loan.Id + Environment.NewLine;
