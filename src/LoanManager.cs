@@ -6,6 +6,16 @@ namespace LibraryDesk.Legacy;
 // Клас навмисно зберігає дефекти початкового навчального зрізу.
 public class LoanManager
 {
+    private const int MaximumActiveLoans = 5;
+    private const int StudentLoanDays = 14;
+    private const int TeacherLoanDays = 30;
+    private const int ChildLoanDays = 7;
+    private const int ReadingRoomLoanDays = 0;
+    private const int ShortLoanDays = 3;
+    private const decimal FinePerBookPerDay = 2m;
+    private const decimal ChildFineRate = 0.5m;
+    private const decimal MaximumFine = 500m;
+
     private readonly LoanRepository _repository;
     private readonly List<string> _log = new();
     private int _nextId = 1;
@@ -36,7 +46,7 @@ public class LoanManager
                 {
                     if (books.Count > 0)
                     {
-                        if (reader.ActiveLoans < 5 || reader.Category == "staff")
+                        if (reader.ActiveLoans < MaximumActiveLoans || reader.Category == "staff")
                         {
                             bool canContinue = true;
                             for (int i = 0; i < books.Count; i++)
@@ -83,29 +93,29 @@ public class LoanManager
             return result;
         }
 
-        int days = 14;
+        int days = StudentLoanDays;
         if (subscription == "student")
         {
-            days = 14;
+            days = StudentLoanDays;
         }
         else if (subscription == "teacher")
         {
-            days = 30;
+            days = TeacherLoanDays;
         }
         else if (subscription == "child")
         {
-            days = 7;
+            days = ChildLoanDays;
         }
         else if (subscription == "reading-room")
         {
-            days = 0;
+            days = ReadingRoomLoanDays;
         }
 
         for (int i = 0; i < books.Count; i++)
         {
             if (books[i].Group == "short")
             {
-                days = 3;
+                days = ShortLoanDays;
             }
         }
 
@@ -124,15 +134,15 @@ public class LoanManager
             if (returnedOn.Value.Date > loan.DueOn.Date)
             {
                 int overdueDays = (returnedOn.Value.Date - loan.DueOn.Date).Days;
-                _lastFine = overdueDays * 2m * books.Count;
+                _lastFine = overdueDays * FinePerBookPerDay * books.Count;
                 if (reader.Category == "child")
                 {
-                    _lastFine = _lastFine * 0.5m;
+                    _lastFine = _lastFine * ChildFineRate;
                 }
 
-                if (_lastFine > 500m)
+                if (_lastFine > MaximumFine)
                 {
-                    _lastFine = 500m;
+                    _lastFine = MaximumFine;
                 }
 
                 loan.Status = "overdue";
@@ -197,15 +207,15 @@ public class LoanManager
         if (onDate.Date > loan.DueOn.Date)
         {
             int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
-            fine = overdueDays * 2m * loan.Books.Count;
+            fine = overdueDays * FinePerBookPerDay * loan.Books.Count;
             if (loan.Reader != null && loan.Reader.Category == "child")
             {
-                fine = fine * 0.5m;
+                fine = fine * ChildFineRate;
             }
 
-            if (fine > 500m)
+            if (fine > MaximumFine)
             {
-                fine = 500m;
+                fine = MaximumFine;
             }
         }
 
@@ -242,7 +252,7 @@ public class LoanManager
             return false;
         }
 
-        if (reader.IsBlocked || (reader.ActiveLoans >= 5 && reader.Category != "staff"))
+        if (reader.IsBlocked || (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff"))
         {
             return false;
         }

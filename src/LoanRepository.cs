@@ -4,6 +4,10 @@ namespace LibraryDesk.Legacy;
 
 public class LoanRepository
 {
+    private const decimal FinePerBookPerDay = 2m;
+    private const decimal ChildFineRate = 0.5m;
+    private const decimal MaximumFine = 500m;
+
     private readonly List<Loan> _loans = new();
     private readonly string _path;
 
@@ -68,15 +72,15 @@ public class LoanRepository
             if (onDate.Date > loan.DueOn.Date)
             {
                 int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
-                fine = overdueDays * 2m * loan.Books.Count;
+                fine = overdueDays * FinePerBookPerDay * loan.Books.Count;
                 if (loan.Reader != null && loan.Reader.Category == "child")
                 {
-                    fine = fine * 0.5m;
+                    fine = fine * ChildFineRate;
                 }
 
-                if (fine > 500m)
+                if (fine > MaximumFine)
                 {
-                    fine = 500m;
+                    fine = MaximumFine;
                 }
             }
 
