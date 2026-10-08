@@ -12,20 +12,21 @@ public class LoanReport
         foreach (Loan loan in loans)
         {
             decimal fine = _fineCalculator.Calculate(loan, onDate);
-
-            if (fine > 0m)
+            if (fine <= 0m)
             {
-                report += loan.Id + ";";
-                report += loan.Reader?.Name + ";";
-                report += loan.DueOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ";";
-                report += fine.ToString("0.00", CultureInfo.InvariantCulture);
-                if (includeEmail)
-                {
-                    report += ";" + loan.Reader?.Email;
-                }
-
-                report += Environment.NewLine;
+                continue;
             }
+
+            report += loan.Id + ";";
+            report += loan.Reader?.Name + ";";
+            report += loan.DueOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + ";";
+            report += fine.ToString("0.00", CultureInfo.InvariantCulture);
+            if (includeEmail)
+            {
+                report += ";" + loan.Reader?.Email;
+            }
+
+            report += Environment.NewLine;
         }
 
         return report;
