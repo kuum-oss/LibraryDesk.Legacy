@@ -84,8 +84,6 @@ def param_count(parameters: str) -> int:
 
 def method_blocks(path: Path) -> list[dict[str, object]]:
     lines = path.read_text(encoding="utf-8").splitlines()
-    own_types = TYPE_RE.findall("\n".join(lines))
-    class_name = own_types[0] if own_types else path.stem
     results: list[dict[str, object]] = []
     index = 0
     while index < len(lines):
@@ -101,6 +99,8 @@ def method_blocks(path: Path) -> list[dict[str, object]]:
             index += 1
             continue
         name, parameters = signature_match.groups()
+        previous_types = TYPE_RE.findall("\n".join(lines[: index + 1]))
+        class_name = previous_types[-1] if previous_types else path.stem
         start = index
         brace = signature.count("{") - signature.count("}")
         while brace == 0 and index + 1 < len(lines):
@@ -142,9 +142,9 @@ def class_fanout(source_files: list[Path]) -> dict[str, int]:
     return result
 
 
-def clone_group(row: dict[str, object]) -> str:
+def clone_group(row: dict[str, object], fine_clone_exists: bool) -> str:
     key = (row["Class"], row["Method"])
-    if key in {
+    if fine_clone_exists and key in {
         ("LoanManager", "PreviewFine"),
         ("LoanRepository", "SumOutstandingFines"),
         ("LoanReport", "BuildOverdueReport"),
@@ -159,6 +159,10 @@ def main() -> None:
     source_dir = Path(sys.argv[1])
     output = Path(sys.argv[2])
     source_files = sorted(source_dir.glob("*.cs"))
+    fine_clone_exists = sum(
+        "overdueDays *" in path.read_text(encoding="utf-8")
+        for path in source_files
+    ) >= 3
     fanout = class_fanout(source_files)
     rows = [row for path in source_files for row in method_blocks(path)]
     rows.sort(key=lambda row: (-int(row["CC"]), -int(row["LOC"]), str(row["Method"])))
@@ -169,7 +173,7 @@ def main() -> None:
         writer.writeheader()
         for row in rows:
             row["FanOut"] = fanout.get(str(row["Class"]), 0)
-            row["CloneGroup"] = clone_group(row)
+            row["CloneGroup"] = clone_group(row, fine_clone_exists)
             writer.writerow(row)
 
 

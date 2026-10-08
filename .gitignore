@@ -1,6 +1,6 @@
 bin/
 obj/
-TestResults/
+TestResults*/
 .DS_Store
 .idea/
 *.user
