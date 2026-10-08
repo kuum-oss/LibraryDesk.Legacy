@@ -32,110 +32,95 @@ public class LoanManager
         bool printReceipt,
         string operatorName)
     {
-        LoanResult result = new();
-
-        if (reader == null)
+        string error = ValidateIssue(reader, books);
+        if (error.Length > 0)
         {
-            result.Error = "ERR: reader";
-            return result;
+            return new LoanResult { Error = error };
         }
 
-        if (reader.IsBlocked)
-        {
-            result.Error = "ERR: blocked";
-            return result;
-        }
+        int days = LoanDays(subscription, books!);
+        Loan loan = CreateLoan(reader!, books!, issuedOn, days, operatorName);
+        CompleteReturn(loan, returnedOn);
+        string receipt = BuildReceipt(loan);
+        SaveIgnoringFailure(loan);
+        SendEmailIfRequested(reader!, sendEmail);
+        PrintIfRequested(receipt, printReceipt);
+        reader!.ActiveLoans++;
 
-        if (books == null)
-        {
-            result.Error = "ERR: null-books";
-            return result;
-        }
+        // Старий варіант обмежував видачу двома книгами.
+        // if (books.Count > 2) return new LoanResult();
+        return new LoanResult { Success = true, Loan = loan, Receipt = receipt };
+    }
 
-        if (books.Count == 0)
-        {
-            result.Error = "ERR: empty";
-            return result;
-        }
+    private static string ValidateIssue(Reader? reader, List<BookCopy>? books)
+    {
+        if (reader == null) return "ERR: reader";
+        if (reader.IsBlocked) return "ERR: blocked";
+        if (books == null) return "ERR: null-books";
+        if (books.Count == 0) return "ERR: empty";
+        if (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff") return "ERR: limit";
+        return books.Any(book => !book.IsAvailable || book.IsReferenceOnly) ? "ERR: book" : "";
+    }
 
-        if (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff")
+    private static int LoanDays(string subscription, List<BookCopy> books)
+    {
+        int days = subscription switch
         {
-            result.Error = "ERR: limit";
-            return result;
-        }
+            "teacher" => TeacherLoanDays,
+            "child" => ChildLoanDays,
+            "reading-room" => ReadingRoomLoanDays,
+            _ => StudentLoanDays,
+        };
 
-        for (int i = 0; i < books.Count; i++)
-        {
-            if (!books[i].IsAvailable || books[i].IsReferenceOnly)
-            {
-                result.Error = "ERR: book";
-                return result;
-            }
-        }
+        return books.Any(book => book.Group == "short") ? ShortLoanDays : days;
+    }
 
-        int days = StudentLoanDays;
-        if (subscription == "student")
+    private Loan CreateLoan(
+        Reader reader,
+        List<BookCopy> books,
+        DateTime issuedOn,
+        int days,
+        string operatorName)
+    {
+        return new Loan
         {
-            days = StudentLoanDays;
-        }
-        else if (subscription == "teacher")
-        {
-            days = TeacherLoanDays;
-        }
-        else if (subscription == "child")
-        {
-            days = ChildLoanDays;
-        }
-        else if (subscription == "reading-room")
-        {
-            days = ReadingRoomLoanDays;
-        }
+            Id = _nextId++,
+            Reader = reader,
+            Books = books,
+            IssuedOn = issuedOn,
+            DueOn = issuedOn.Date.AddDays(days),
+            Status = "active",
+            CreatedBy = operatorName,
+        };
+    }
 
-        for (int i = 0; i < books.Count; i++)
-        {
-            if (books[i].Group == "short")
-            {
-                days = ShortLoanDays;
-            }
-        }
+    private void CompleteReturn(Loan loan, DateTime? returnedOn)
+    {
+        if (returnedOn == null) return;
+        loan.Status = returnedOn.Value.Date > loan.DueOn.Date ? "overdue" : "returned";
+        loan.Fine = PreviewFine(loan, returnedOn.Value);
+        loan.ReturnedOn = returnedOn;
+    }
 
-        Loan loan = new();
-        loan.Id = _nextId++;
-        loan.Reader = reader;
-        loan.Books = books;
-        loan.IssuedOn = issuedOn;
-        loan.DueOn = issuedOn.Date.AddDays(days);
-        loan.Status = "active";
-        loan.CreatedBy = operatorName;
-
-        if (returnedOn != null)
-        {
-            if (returnedOn.Value.Date > loan.DueOn.Date)
-            {
-                loan.Fine = PreviewFine(loan, returnedOn.Value);
-                loan.Status = "overdue";
-            }
-            else
-            {
-                loan.Status = "returned";
-            }
-
-            loan.ReturnedOn = returnedOn;
-        }
-
+    private static string BuildReceipt(Loan loan)
+    {
         string receipt = "Видача #" + loan.Id + Environment.NewLine;
-        receipt += "Читач: " + reader.Name + Environment.NewLine;
-        receipt += "Видано: " + issuedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + Environment.NewLine;
+        receipt += "Читач: " + loan.Reader!.Name + Environment.NewLine;
+        receipt += "Видано: " + loan.IssuedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + Environment.NewLine;
         receipt += "Повернути: " + loan.DueOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + Environment.NewLine;
-        for (int i = 0; i < books.Count; i++)
+        foreach (BookCopy book in loan.Books)
         {
-            receipt += books[i].InventoryCode + " — " + books[i].Title + Environment.NewLine;
-            books[i].IsAvailable = false;
+            receipt += book.InventoryCode + " — " + book.Title + Environment.NewLine;
+            book.IsAvailable = false;
         }
 
         receipt += "Пеня: " + loan.Fine.ToString("0.00", CultureInfo.InvariantCulture) + Environment.NewLine;
         receipt += "Статус: " + loan.Status + Environment.NewLine;
+        return receipt;
+    }
 
+    private void SaveIgnoringFailure(Loan loan)
+    {
         try
         {
             _repository.Save(loan);
@@ -144,28 +129,22 @@ public class LoanManager
         {
             // Історична поведінка: помилка збереження не зупиняє видачу.
         }
+    }
 
-        if (sendEmail)
+    private void SendEmailIfRequested(Reader reader, bool sendEmail)
+    {
+        if (sendEmail && reader.Email.Contains('@'))
         {
-            if (reader.Email.Contains('@'))
-            {
-                _log.Add("mail -> " + reader.Email);
-            }
+            _log.Add("mail -> " + reader.Email);
         }
+    }
 
+    private static void PrintIfRequested(string receipt, bool printReceipt)
+    {
         if (printReceipt)
         {
             Console.Write(receipt);
         }
-
-        reader.ActiveLoans++;
-        result.Success = true;
-        result.Loan = loan;
-        result.Receipt = receipt;
-
-        // Старий варіант обмежував видачу двома книгами.
-        // if (books.Count > 2) return new LoanResult();
-        return result;
     }
 
     public decimal PreviewFine(Loan loan, DateTime onDate)
