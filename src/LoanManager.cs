@@ -94,7 +94,7 @@ public class LoanManager
     {
         if (returnedOn == null) return;
         loan.Status = returnedOn.Value.Date > loan.DueOn.Date ? "overdue" : "returned";
-        loan.Fine = PreviewFine(loan, returnedOn.Value);
+        loan.Fine = _fineCalculator.Calculate(loan, returnedOn.Value);
         loan.ReturnedOn = returnedOn;
     }
 
@@ -141,27 +141,6 @@ public class LoanManager
         {
             Console.Write(receipt);
         }
-    }
-
-    public decimal PreviewFine(Loan loan, DateTime onDate)
-    {
-        decimal fine = 0m;
-        if (onDate.Date > loan.DueOn.Date)
-        {
-            int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
-            fine = overdueDays * _fineCalculator.FinePerBookPerDay * loan.Books.Count;
-            if (loan.Reader != null && loan.Reader.Category == "child")
-            {
-                fine = fine * _fineCalculator.ChildFineRate;
-            }
-
-            if (fine > _fineCalculator.MaximumFine)
-            {
-                fine = _fineCalculator.MaximumFine;
-            }
-        }
-
-        return fine;
     }
 
     public bool ChangeStatus(Loan loan, string next)

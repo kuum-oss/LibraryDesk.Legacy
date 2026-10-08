@@ -4,30 +4,14 @@ namespace LibraryDesk.Legacy;
 
 public class LoanReport
 {
-    private const decimal FinePerBookPerDay = 2m;
-    private const decimal ChildFineRate = 0.5m;
-    private const decimal MaximumFine = 500m;
+    private readonly FineCalculator _fineCalculator = new();
 
     public string BuildOverdueReport(List<Loan> loans, DateTime onDate, bool includeEmail)
     {
         string report = "id;reader;due;fine" + Environment.NewLine;
         foreach (Loan loan in loans)
         {
-            decimal fine = 0m;
-            if (onDate.Date > loan.DueOn.Date)
-            {
-                int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
-                fine = overdueDays * FinePerBookPerDay * loan.Books.Count;
-                if (loan.Reader != null && loan.Reader.Category == "child")
-                {
-                    fine = fine * ChildFineRate;
-                }
-
-                if (fine > MaximumFine)
-                {
-                    fine = MaximumFine;
-                }
-            }
+            decimal fine = _fineCalculator.Calculate(loan, onDate);
 
             if (fine > 0m)
             {
