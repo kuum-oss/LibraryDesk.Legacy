@@ -34,6 +34,7 @@ public class LoanReport
 
     public string BuildReaderCard(Reader reader, List<Loan> loans)
     {
+        // TODO TD-06: перенести форматування читача до окремого presenter.
         string text = reader.Name.Trim().ToUpperInvariant();
         text += " [" + reader.Category + "]";
         text += " active=" + reader.ActiveLoans;

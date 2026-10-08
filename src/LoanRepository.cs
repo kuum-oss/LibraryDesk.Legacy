@@ -5,6 +5,7 @@ namespace LibraryDesk.Legacy;
 
 public class LoanRepository
 {
+    // TODO TD-02: додати тести сховища до ЛР-7; ціль покриття >= 70%.
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower) },
@@ -16,6 +17,7 @@ public class LoanRepository
 
     public LoanRepository(string? path = null)
     {
+        // TODO TD-05: замінити прямий File API адаптером до ЛР-8.
         _path = path ?? "loans.json";
     }
 

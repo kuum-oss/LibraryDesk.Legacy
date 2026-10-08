@@ -6,6 +6,7 @@ namespace LibraryDesk.Legacy;
 // Клас навмисно зберігає дефекти початкового навчального зрізу.
 public class LoanManager
 {
+    // TODO TD-03: fan-out = 11; розділити координацію до ЛР-8.
     private const int MaximumActiveLoans = 5;
     private const int StudentLoanDays = 14;
     private const int TeacherLoanDays = 30;
@@ -151,6 +152,7 @@ public class LoanManager
 
     private void SaveIgnoringFailure(Loan loan)
     {
+        // TODO TD-01: не ковтати IOException; виправити окремим fix до ЛР-7.
         try
         {
             _repository.Save(loan);
@@ -202,6 +204,7 @@ public class LoanManager
 
     public bool CanIssue(Reader? reader, List<BookCopy>? books)
     {
+        // TODO TD-04: CC = 10; об'єднати з ValidateIssue на тижні 10.
         if (reader == null || books == null || books.Count == 0)
         {
             return false;
