@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="660" viewBox="0 0 1120 660">
+<rect width="100%" height="100%" fill="white"/>
+<text x="560.0" y="38" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700">Цикломатична складність до рефакторингу</text>
+<line x1="260" y1="80" x2="260" y2="570" stroke="#1f2937"/>
+<line x1="260" y1="570" x2="1075" y2="570" stroke="#1f2937"/>
+<line x1="260.0" y1="80" x2="260.0" y2="570" stroke="#e5e7eb"/>
+<text x="260.0" y="595" text-anchor="middle" font-family="Arial" font-size="13">0</text>
+<line x1="376.4" y1="80" x2="376.4" y2="570" stroke="#e5e7eb"/>
+<text x="376.4" y="595" text-anchor="middle" font-family="Arial" font-size="13">4</text>
+<line x1="492.9" y1="80" x2="492.9" y2="570" stroke="#e5e7eb"/>
+<text x="492.9" y="595" text-anchor="middle" font-family="Arial" font-size="13">8</text>
+<line x1="609.3" y1="80" x2="609.3" y2="570" stroke="#e5e7eb"/>
+<text x="609.3" y="595" text-anchor="middle" font-family="Arial" font-size="13">12</text>
+<line x1="725.7" y1="80" x2="725.7" y2="570" stroke="#e5e7eb"/>
+<text x="725.7" y="595" text-anchor="middle" font-family="Arial" font-size="13">16</text>
+<line x1="842.1" y1="80" x2="842.1" y2="570" stroke="#e5e7eb"/>
+<text x="842.1" y="595" text-anchor="middle" font-family="Arial" font-size="13">20</text>
+<line x1="958.6" y1="80" x2="958.6" y2="570" stroke="#e5e7eb"/>
+<text x="958.6" y="595" text-anchor="middle" font-family="Arial" font-size="13">24</text>
+<line x1="1075.0" y1="80" x2="1075.0" y2="570" stroke="#e5e7eb"/>
+<text x="1075.0" y="595" text-anchor="middle" font-family="Arial" font-size="13">28</text>
+<line x1="492.9" y1="80" x2="492.9" y2="570" stroke="#dc2626" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="500.9" y="98" font-family="Arial" font-size="14" fill="#dc2626">поріг CC = 8</text>
+<text x="250" y="100.9" text-anchor="end" font-family="Arial" font-size="13">LoanManager.Issue</text>
+<rect x="260" y="85.9" width="756.8" height="20.9" rx="3" fill="#dc2626"/>
+<text x="1024.8" y="100.9" font-family="Arial" font-size="13" font-weight="700">26</text>
+<text x="250" y="133.6" text-anchor="end" font-family="Arial" font-size="13">LoanReport.BuildOverdueReport</text>
+<rect x="260" y="118.5" width="291.1" height="20.9" rx="3" fill="#dc2626"/>
+<text x="559.1" y="133.6" font-family="Arial" font-size="13" font-weight="700">10</text>
+<text x="250" y="166.3" text-anchor="end" font-family="Arial" font-size="13">LoanManager.CanIssue</text>
+<rect x="260" y="151.2" width="291.1" height="20.9" rx="3" fill="#dc2626"/>
+<text x="559.1" y="166.3" font-family="Arial" font-size="13" font-weight="700">10</text>
+<text x="250" y="198.9" text-anchor="end" font-family="Arial" font-size="13">LoanManager.ChangeStatus</text>
+<rect x="260" y="183.9" width="262.0" height="20.9" rx="3" fill="#dc2626"/>
+<text x="530.0" y="198.9" font-family="Arial" font-size="13" font-weight="700">9</text>
+<text x="250" y="231.6" text-anchor="end" font-family="Arial" font-size="13">LoanRepository.SumOutstandingFines</text>
+<rect x="260" y="216.5" width="174.6" height="20.9" rx="3" fill="#2563eb"/>
+<text x="442.6" y="231.6" font-family="Arial" font-size="13" font-weight="700">6</text>
+<text x="250" y="264.3" text-anchor="end" font-family="Arial" font-size="13">LoanManager.PreviewFine</text>
+<rect x="260" y="249.2" width="145.5" height="20.9" rx="3" fill="#2563eb"/>
+<text x="413.5" y="264.3" font-family="Arial" font-size="13" font-weight="700">5</text>
+<text x="250" y="296.9" text-anchor="end" font-family="Arial" font-size="13">LoanReport.BuildReaderCard</text>
+<rect x="260" y="281.9" width="116.4" height="20.9" rx="3" fill="#2563eb"/>
+<text x="384.4" y="296.9" font-family="Arial" font-size="13" font-weight="700">4</text>
+<text x="250" y="329.6" text-anchor="end" font-family="Arial" font-size="13">LoanManager.Cancel</text>
+<rect x="260" y="314.5" width="116.4" height="20.9" rx="3" fill="#2563eb"/>
+<text x="384.4" y="329.6" font-family="Arial" font-size="13" font-weight="700">4</text>
+<text x="250" y="362.3" text-anchor="end" font-family="Arial" font-size="13">LoanRepository.FindByReader</text>
+<rect x="260" y="347.2" width="116.4" height="20.9" rx="3" fill="#2563eb"/>
+<text x="384.4" y="362.3" font-family="Arial" font-size="13" font-weight="700">4</text>
+<text x="250" y="394.9" text-anchor="end" font-family="Arial" font-size="13">LoanRepository.FindByStatus</text>
+<rect x="260" y="379.9" width="87.3" height="20.9" rx="3" fill="#2563eb"/>
+<text x="355.3" y="394.9" font-family="Arial" font-size="13" font-weight="700">3</text>
+<text x="250" y="427.6" text-anchor="end" font-family="Arial" font-size="13">LoanRepository.Find</text>
+<rect x="260" y="412.5" width="87.3" height="20.9" rx="3" fill="#2563eb"/>
+<text x="355.3" y="427.6" font-family="Arial" font-size="13" font-weight="700">3</text>
+<text x="250" y="460.3" text-anchor="end" font-family="Arial" font-size="13">LoanReport.BuildInventoryReport</text>
+<rect x="260" y="445.2" width="58.2" height="20.9" rx="3" fill="#2563eb"/>
+<text x="326.2" y="460.3" font-family="Arial" font-size="13" font-weight="700">2</text>
+<text x="250" y="492.9" text-anchor="end" font-family="Arial" font-size="13">LoanRepository.Clear</text>
+<rect x="260" y="477.9" width="58.2" height="20.9" rx="3" fill="#2563eb"/>
+<text x="326.2" y="492.9" font-family="Arial" font-size="13" font-weight="700">2</text>
+<text x="250" y="525.6" text-anchor="end" font-family="Arial" font-size="13">LoanManager.DumpLog</text>
+<rect x="260" y="510.5" width="58.2" height="20.9" rx="3" fill="#2563eb"/>
+<text x="326.2" y="525.6" font-family="Arial" font-size="13" font-weight="700">2</text>
+<text x="250" y="558.3" text-anchor="end" font-family="Arial" font-size="13">LoanReport.SaveReport</text>
+<rect x="260" y="543.2" width="58.2" height="20.9" rx="3" fill="#2563eb"/>
+<text x="326.2" y="558.3" font-family="Arial" font-size="13" font-weight="700">2</text>
+<text x="667.5" y="636" text-anchor="middle" font-family="Arial" font-size="16">Цикломатична складність (CC)</text>
+</svg>
