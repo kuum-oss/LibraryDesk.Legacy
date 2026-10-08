@@ -77,16 +77,17 @@ public class LoanManager
         int days,
         string operatorName)
     {
-        return new Loan
+        Loan loan = new()
         {
             Id = _nextId++,
             Reader = reader,
-            Books = books,
             IssuedOn = issuedOn,
             DueOn = issuedOn.Date.AddDays(days),
             Status = "active",
             CreatedBy = operatorName,
         };
+        loan.SetBooks(books);
+        return loan;
     }
 
     private void CompleteReturn(Loan loan, DateTime? returnedOn)
