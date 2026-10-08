@@ -47,8 +47,6 @@ public class LoanManager
         PrintIfRequested(receipt, printReceipt);
         reader!.ActiveLoans++;
 
-        // Старий варіант обмежував видачу двома книгами.
-        // if (books.Count > 2) return new LoanResult();
         return new LoanResult { Success = true, Loan = loan, Receipt = receipt };
     }
 
