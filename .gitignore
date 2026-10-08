@@ -1,0 +1,7 @@
+bin/
+obj/
+TestResults/
+.DS_Store
+*.user
+*.suo
+loans.json
