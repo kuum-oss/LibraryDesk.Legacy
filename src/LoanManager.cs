@@ -22,7 +22,7 @@ public class LoanManager
         _repository = repository ?? new LoanRepository();
     }
 
-    public LoanResult Issue(IssueRequest request, bool sendEmail, bool printReceipt)
+    public LoanResult Issue(IssueRequest request)
     {
         string error = ValidateIssue(request.Reader, request.Books);
         if (error.Length > 0)
@@ -40,11 +40,43 @@ public class LoanManager
         CompleteReturn(loan, request.ReturnedOn);
         string receipt = BuildReceipt(loan);
         SaveIgnoringFailure(loan);
-        SendEmailIfRequested(request.Reader!, sendEmail);
-        PrintIfRequested(receipt, printReceipt);
         request.Reader!.ActiveLoans++;
 
         return new LoanResult { Success = true, Loan = loan, Receipt = receipt };
+    }
+
+    public LoanResult IssueAndNotify(IssueRequest request)
+    {
+        LoanResult result = Issue(request);
+        if (result.Success)
+        {
+            SendEmail(request.Reader!);
+        }
+
+        return result;
+    }
+
+    public LoanResult IssueAndPrint(IssueRequest request)
+    {
+        LoanResult result = Issue(request);
+        if (result.Success)
+        {
+            PrintReceipt(result.Receipt);
+        }
+
+        return result;
+    }
+
+    public LoanResult IssueNotifyAndPrint(IssueRequest request)
+    {
+        LoanResult result = Issue(request);
+        if (result.Success)
+        {
+            SendEmail(request.Reader!);
+            PrintReceipt(result.Receipt);
+        }
+
+        return result;
     }
 
     private static string ValidateIssue(Reader? reader, List<BookCopy>? books)
@@ -129,20 +161,17 @@ public class LoanManager
         }
     }
 
-    private void SendEmailIfRequested(Reader reader, bool sendEmail)
+    private void SendEmail(Reader reader)
     {
-        if (sendEmail && reader.Email.Contains('@'))
+        if (reader.Email.Contains('@'))
         {
             _log.Add("mail -> " + reader.Email);
         }
     }
 
-    private static void PrintIfRequested(string receipt, bool printReceipt)
+    private static void PrintReceipt(string receipt)
     {
-        if (printReceipt)
-        {
-            Console.Write(receipt);
-        }
+        Console.Write(receipt);
     }
 
     public bool ChangeStatus(Loan loan, LoanStatus next)

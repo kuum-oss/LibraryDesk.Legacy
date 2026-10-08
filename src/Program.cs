@@ -27,16 +27,14 @@ List<BookCopy> books =
 ];
 
 LoanManager manager = new();
-LoanResult result = manager.Issue(
+LoanResult result = manager.IssueAndNotify(
     new IssueRequest(
         reader,
         books,
         new DateTime(2026, 10, 1),
         new DateTime(2026, 10, 20),
         SubscriptionType.Student,
-        "demo"),
-    sendEmail: true,
-    printReceipt: false);
+        "demo"));
 
 Console.Write(result.Receipt);
 Console.Write(manager.DumpLog());

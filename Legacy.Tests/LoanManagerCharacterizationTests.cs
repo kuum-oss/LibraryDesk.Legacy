@@ -16,10 +16,8 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanManager sut = CreateManager();
 
         // act
-        LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student),
-            false,
-            false);
+        LoanResult actual = sut.IssueAndNotify(
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student));
 
         // assert
         Assert.True(actual.Success);
@@ -33,10 +31,8 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanManager sut = CreateManager();
 
         // act
-        LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Teacher),
-            false,
-            false);
+        LoanResult actual = sut.IssueAndPrint(
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Teacher));
 
         // assert
         Assert.Equal(new DateTime(2026, 10, 31), actual.Loan!.DueOn);
@@ -49,10 +45,8 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanManager sut = CreateManager();
 
         // act
-        LoanResult actual = sut.Issue(
-            Request(Reader(ReaderCategory.Child), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Child),
-            false,
-            false);
+        LoanResult actual = sut.IssueNotifyAndPrint(
+            Request(Reader(ReaderCategory.Child), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Child));
 
         // assert
         Assert.Equal(new DateTime(2026, 10, 8), actual.Loan!.DueOn);
@@ -66,9 +60,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.ReadingRoom),
-            false,
-            false);
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.ReadingRoom));
 
         // assert
         Assert.Equal(new DateTime(2026, 10, 1), actual.Loan!.DueOn);
@@ -83,9 +75,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Teacher),
-            false,
-            false);
+            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Teacher));
 
         // assert
         Assert.Equal(new DateTime(2026, 10, 4), actual.Loan!.DueOn);
@@ -101,9 +91,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanResult actual = sut.Issue(
             Request(
                 Reader(), Books(count: 2), new DateTime(2026, 10, 1),
-                new DateTime(2026, 10, 20), SubscriptionType.Student),
-            false,
-            false);
+                new DateTime(2026, 10, 20), SubscriptionType.Student));
 
         // assert
         Assert.Equal(20m, actual.Loan!.Fine);
@@ -120,9 +108,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanResult actual = sut.Issue(
             Request(
                 Reader(ReaderCategory.Child), Books(), new DateTime(2026, 10, 1),
-                new DateTime(2026, 10, 10), SubscriptionType.Child),
-            false,
-            false);
+                new DateTime(2026, 10, 10), SubscriptionType.Child));
 
         // assert
         Assert.Equal(2m, actual.Loan!.Fine);
@@ -138,9 +124,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanResult actual = sut.Issue(
             Request(
                 Reader(), Books(count: 2), new DateTime(2025, 1, 1),
-                new DateTime(2026, 1, 1), SubscriptionType.Student),
-            false,
-            false);
+                new DateTime(2026, 1, 1), SubscriptionType.Student));
 
         // assert
         Assert.Equal(500m, actual.Loan!.Fine);
@@ -154,9 +138,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(null, Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student),
-            false,
-            false);
+            Request(null, Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student));
 
         // assert
         Assert.False(actual.Success);
@@ -171,9 +153,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), [], new DateTime(2026, 10, 1), null, SubscriptionType.Student),
-            false,
-            false);
+            Request(Reader(), [], new DateTime(2026, 10, 1), null, SubscriptionType.Student));
 
         // assert
         Assert.False(actual.Success);
@@ -190,9 +170,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Student),
-            false,
-            false);
+            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Student));
 
         // assert
         Assert.False(actual.Success);
