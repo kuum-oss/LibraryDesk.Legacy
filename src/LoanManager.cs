@@ -12,11 +12,8 @@ public class LoanManager
     private const int ChildLoanDays = 7;
     private const int ReadingRoomLoanDays = 0;
     private const int ShortLoanDays = 3;
-    private const decimal FinePerBookPerDay = 2m;
-    private const decimal ChildFineRate = 0.5m;
-    private const decimal MaximumFine = 500m;
-
     private readonly LoanRepository _repository;
+    private readonly FineCalculator _fineCalculator = new();
     private readonly List<string> _log = new();
     private int _nextId = 1;
 
@@ -177,15 +174,15 @@ public class LoanManager
         if (onDate.Date > loan.DueOn.Date)
         {
             int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
-            fine = overdueDays * FinePerBookPerDay * loan.Books.Count;
+            fine = overdueDays * _fineCalculator.FinePerBookPerDay * loan.Books.Count;
             if (loan.Reader != null && loan.Reader.Category == "child")
             {
-                fine = fine * ChildFineRate;
+                fine = fine * _fineCalculator.ChildFineRate;
             }
 
-            if (fine > MaximumFine)
+            if (fine > _fineCalculator.MaximumFine)
             {
-                fine = MaximumFine;
+                fine = _fineCalculator.MaximumFine;
             }
         }
 
