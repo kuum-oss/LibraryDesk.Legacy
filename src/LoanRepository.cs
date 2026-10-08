@@ -1,9 +1,15 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace LibraryDesk.Legacy;
 
 public class LoanRepository
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower) },
+    };
+
     private readonly List<Loan> _loans = new();
     private readonly string _path;
     private readonly FineCalculator _fineCalculator = new();
@@ -16,7 +22,7 @@ public class LoanRepository
     public void Save(Loan loan)
     {
         _loans.Add(loan);
-        File.WriteAllText(_path, JsonSerializer.Serialize(_loans));
+        File.WriteAllText(_path, JsonSerializer.Serialize(_loans, JsonOptions));
     }
 
     public Loan? Find(int id)
@@ -46,7 +52,7 @@ public class LoanRepository
         return result;
     }
 
-    public List<Loan> FindByStatus(string status)
+    public List<Loan> FindByStatus(LoanStatus status)
     {
         List<Loan> result = new();
         for (int i = 0; i < _loans.Count; i++)

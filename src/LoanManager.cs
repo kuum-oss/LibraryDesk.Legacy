@@ -53,21 +53,21 @@ public class LoanManager
         if (reader.IsBlocked) return "ERR: blocked";
         if (books == null) return "ERR: null-books";
         if (books.Count == 0) return "ERR: empty";
-        if (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff") return "ERR: limit";
+        if (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != ReaderCategory.Staff) return "ERR: limit";
         return books.Any(book => !book.IsAvailable || book.IsReferenceOnly) ? "ERR: book" : "";
     }
 
-    private static int LoanDays(string subscription, List<BookCopy> books)
+    private static int LoanDays(SubscriptionType subscription, List<BookCopy> books)
     {
         int days = subscription switch
         {
-            "teacher" => TeacherLoanDays,
-            "child" => ChildLoanDays,
-            "reading-room" => ReadingRoomLoanDays,
+            SubscriptionType.Teacher => TeacherLoanDays,
+            SubscriptionType.Child => ChildLoanDays,
+            SubscriptionType.ReadingRoom => ReadingRoomLoanDays,
             _ => StudentLoanDays,
         };
 
-        return books.Any(book => book.Group == "short") ? ShortLoanDays : days;
+        return books.Any(book => book.Group == BookGroup.Short) ? ShortLoanDays : days;
     }
 
     private Loan CreateLoan(
@@ -83,7 +83,7 @@ public class LoanManager
             Reader = reader,
             IssuedOn = issuedOn,
             DueOn = issuedOn.Date.AddDays(days),
-            Status = "active",
+            Status = LoanStatus.Active,
             CreatedBy = operatorName,
         };
         loan.SetBooks(books);
@@ -93,7 +93,9 @@ public class LoanManager
     private void CompleteReturn(Loan loan, DateTime? returnedOn)
     {
         if (returnedOn == null) return;
-        loan.Status = returnedOn.Value.Date > loan.DueOn.Date ? "overdue" : "returned";
+        loan.Status = returnedOn.Value.Date > loan.DueOn.Date
+            ? LoanStatus.Overdue
+            : LoanStatus.Returned;
         loan.Fine = _fineCalculator.Calculate(loan, returnedOn.Value);
         loan.ReturnedOn = returnedOn;
     }
@@ -111,7 +113,7 @@ public class LoanManager
         }
 
         receipt += "Пеня: " + loan.Fine.ToString("0.00", CultureInfo.InvariantCulture) + Environment.NewLine;
-        receipt += "Статус: " + loan.Status + Environment.NewLine;
+        receipt += "Статус: " + loan.Status.ToString().ToLowerInvariant() + Environment.NewLine;
         return receipt;
     }
 
@@ -143,12 +145,12 @@ public class LoanManager
         }
     }
 
-    public bool ChangeStatus(Loan loan, string next)
+    public bool ChangeStatus(Loan loan, LoanStatus next)
     {
-        bool canFinishActiveLoan = loan.Status == "active"
-            && (next == "returned" || next == "overdue" || next == "lost");
+        bool canFinishActiveLoan = loan.Status == LoanStatus.Active
+            && next is LoanStatus.Returned or LoanStatus.Overdue or LoanStatus.Lost;
 
-        if (loan.Status == "new" && next == "active")
+        if (loan.Status == LoanStatus.New && next == LoanStatus.Active)
         {
             loan.Status = next;
             return true;
@@ -160,7 +162,7 @@ public class LoanManager
             return true;
         }
 
-        if (loan.Status == "overdue" && next == "returned")
+        if (loan.Status == LoanStatus.Overdue && next == LoanStatus.Returned)
         {
             loan.Status = next;
             return true;
@@ -176,7 +178,7 @@ public class LoanManager
             return false;
         }
 
-        if (reader.IsBlocked || (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != "staff"))
+        if (reader.IsBlocked || (reader.ActiveLoans >= MaximumActiveLoans && reader.Category != ReaderCategory.Staff))
         {
             return false;
         }
@@ -194,9 +196,9 @@ public class LoanManager
 
     public bool Cancel(Loan loan, string reason)
     {
-        if (loan.Status == "new" || loan.Status == "active")
+        if (loan.Status is LoanStatus.New or LoanStatus.Active)
         {
-            loan.Status = "cancelled";
+            loan.Status = LoanStatus.Cancelled;
             loan.Note = reason;
             foreach (BookCopy book in loan.Books)
             {

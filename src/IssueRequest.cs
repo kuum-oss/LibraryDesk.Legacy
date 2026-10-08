@@ -5,6 +5,5 @@ public sealed record IssueRequest(
     List<BookCopy>? Books,
     DateTime IssuedOn,
     DateTime? ReturnedOn,
-    string Subscription,
+    SubscriptionType Subscription,
     string OperatorName);
-

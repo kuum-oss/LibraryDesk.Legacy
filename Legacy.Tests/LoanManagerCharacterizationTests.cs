@@ -17,7 +17,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, "student"),
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student),
             false,
             false);
 
@@ -34,7 +34,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, "teacher"),
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Teacher),
             false,
             false);
 
@@ -50,7 +50,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(category: "child"), Books(), new DateTime(2026, 10, 1), null, "child"),
+            Request(Reader(ReaderCategory.Child), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Child),
             false,
             false);
 
@@ -66,7 +66,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, "reading-room"),
+            Request(Reader(), Books(), new DateTime(2026, 10, 1), null, SubscriptionType.ReadingRoom),
             false,
             false);
 
@@ -79,11 +79,11 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
     {
         // arrange
         LoanManager sut = CreateManager();
-        List<BookCopy> books = Books(group: "short");
+        List<BookCopy> books = Books(group: BookGroup.Short);
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), books, new DateTime(2026, 10, 1), null, "teacher"),
+            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Teacher),
             false,
             false);
 
@@ -101,13 +101,13 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanResult actual = sut.Issue(
             Request(
                 Reader(), Books(count: 2), new DateTime(2026, 10, 1),
-                new DateTime(2026, 10, 20), "student"),
+                new DateTime(2026, 10, 20), SubscriptionType.Student),
             false,
             false);
 
         // assert
         Assert.Equal(20m, actual.Loan!.Fine);
-        Assert.Equal("overdue", actual.Loan.Status);
+        Assert.Equal(LoanStatus.Overdue, actual.Loan.Status);
     }
 
     [Fact]
@@ -119,8 +119,8 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         // act
         LoanResult actual = sut.Issue(
             Request(
-                Reader(category: "child"), Books(), new DateTime(2026, 10, 1),
-                new DateTime(2026, 10, 10), "child"),
+                Reader(ReaderCategory.Child), Books(), new DateTime(2026, 10, 1),
+                new DateTime(2026, 10, 10), SubscriptionType.Child),
             false,
             false);
 
@@ -138,7 +138,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         LoanResult actual = sut.Issue(
             Request(
                 Reader(), Books(count: 2), new DateTime(2025, 1, 1),
-                new DateTime(2026, 1, 1), "student"),
+                new DateTime(2026, 1, 1), SubscriptionType.Student),
             false,
             false);
 
@@ -154,7 +154,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(null, Books(), new DateTime(2026, 10, 1), null, "student"),
+            Request(null, Books(), new DateTime(2026, 10, 1), null, SubscriptionType.Student),
             false,
             false);
 
@@ -171,7 +171,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), [], new DateTime(2026, 10, 1), null, "student"),
+            Request(Reader(), [], new DateTime(2026, 10, 1), null, SubscriptionType.Student),
             false,
             false);
 
@@ -190,7 +190,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
 
         // act
         LoanResult actual = sut.Issue(
-            Request(Reader(), books, new DateTime(2026, 10, 1), null, "student"),
+            Request(Reader(), books, new DateTime(2026, 10, 1), null, SubscriptionType.Student),
             false,
             false);
 
@@ -204,14 +204,14 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
     {
         // arrange
         LoanManager sut = CreateManager();
-        Loan loan = new() { Status = "active" };
+        Loan loan = new() { Status = LoanStatus.Active };
 
         // act
-        bool actual = sut.ChangeStatus(loan, "returned");
+        bool actual = sut.ChangeStatus(loan, LoanStatus.Returned);
 
         // assert
         Assert.True(actual);
-        Assert.Equal("returned", loan.Status);
+        Assert.Equal(LoanStatus.Returned, loan.Status);
     }
 
     [Fact]
@@ -219,14 +219,14 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
     {
         // arrange
         LoanManager sut = CreateManager();
-        Loan loan = new() { Status = "returned" };
+        Loan loan = new() { Status = LoanStatus.Returned };
 
         // act
-        bool actual = sut.ChangeStatus(loan, "active");
+        bool actual = sut.ChangeStatus(loan, LoanStatus.Active);
 
         // assert
         Assert.False(actual);
-        Assert.Equal("returned", loan.Status);
+        Assert.Equal(LoanStatus.Returned, loan.Status);
     }
 
     public void Dispose()
@@ -255,12 +255,12 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         List<BookCopy>? books,
         DateTime issuedOn,
         DateTime? returnedOn,
-        string subscription)
+        SubscriptionType subscription)
     {
         return new IssueRequest(reader, books, issuedOn, returnedOn, subscription, "test");
     }
 
-    private static Reader Reader(string category = "regular")
+    private static Reader Reader(ReaderCategory category = ReaderCategory.Regular)
     {
         return new Reader
         {
@@ -271,7 +271,7 @@ public sealed class LoanManagerCharacterizationTests : IDisposable
         };
     }
 
-    private static List<BookCopy> Books(int count = 1, string group = "regular")
+    private static List<BookCopy> Books(int count = 1, BookGroup group = BookGroup.Regular)
     {
         List<BookCopy> books = new();
         for (int index = 0; index < count; index++)

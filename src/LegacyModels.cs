@@ -5,7 +5,7 @@ public class Reader
     public int Id { get; set; }
     public string Name { get; set; } = "";
     public string Email { get; set; } = "";
-    public string Category { get; set; } = "regular";
+    public ReaderCategory Category { get; set; } = ReaderCategory.Regular;
     public bool IsBlocked { get; set; }
     public int ActiveLoans { get; set; }
     public decimal UnpaidFine { get; set; }
@@ -15,7 +15,7 @@ public class BookCopy
 {
     public string InventoryCode { get; set; } = "";
     public string Title { get; set; } = "";
-    public string Group { get; set; } = "regular";
+    public BookGroup Group { get; set; } = BookGroup.Regular;
     public decimal Price { get; set; }
     public bool IsReferenceOnly { get; set; }
     public bool IsAvailable { get; set; } = true;
@@ -31,7 +31,7 @@ public class Loan
     public DateTime IssuedOn { get; set; }
     public DateTime DueOn { get; set; }
     public DateTime? ReturnedOn { get; set; }
-    public string Status { get; set; } = "new";
+    public LoanStatus Status { get; set; } = LoanStatus.New;
     public decimal Fine { get; set; }
     public string CreatedBy { get; set; } = "";
     public string Note { get; set; } = "";

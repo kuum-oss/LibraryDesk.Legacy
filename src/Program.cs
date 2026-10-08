@@ -5,7 +5,7 @@ Reader reader = new()
     Id = 7,
     Name = "Олена Коваль",
     Email = "olena@example.test",
-    Category = "student",
+    Category = ReaderCategory.Regular,
 };
 
 List<BookCopy> books =
@@ -14,14 +14,14 @@ List<BookCopy> books =
     {
         InventoryCode = "BK-001",
         Title = "Чистий код",
-        Group = "regular",
+        Group = BookGroup.Regular,
         Price = 450m,
     },
     new BookCopy
     {
         InventoryCode = "BK-002",
         Title = "Рефакторинг",
-        Group = "regular",
+        Group = BookGroup.Regular,
         Price = 520m,
     },
 ];
@@ -33,7 +33,7 @@ LoanResult result = manager.Issue(
         books,
         new DateTime(2026, 10, 1),
         new DateTime(2026, 10, 20),
-        "student",
+        SubscriptionType.Student,
         "demo"),
     sendEmail: true,
     printReceipt: false);

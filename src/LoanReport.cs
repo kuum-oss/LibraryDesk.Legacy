@@ -41,7 +41,8 @@ public class LoanReport
         {
             if (loans[i].Reader != null && loans[i].Reader!.Id == reader.Id)
             {
-                text += Environment.NewLine + loans[i].Id + ":" + loans[i].Status;
+                text += Environment.NewLine + loans[i].Id + ":"
+                    + loans[i].Status.ToString().ToLowerInvariant();
             }
         }
 

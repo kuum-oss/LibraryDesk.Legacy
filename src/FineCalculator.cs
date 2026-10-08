@@ -17,7 +17,7 @@ public sealed class FineCalculator
 
         int overdueDays = (onDate.Date - loan.DueOn.Date).Days;
         decimal fine = overdueDays * FinePerBookPerDay * loan.Books.Count;
-        if (loan.Reader?.Category == "child")
+        if (loan.Reader?.Category == ReaderCategory.Child)
         {
             fine *= ChildFineRate;
         }
