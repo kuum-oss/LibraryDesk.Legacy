@@ -28,15 +28,15 @@ List<BookCopy> books =
 
 LoanManager manager = new();
 LoanResult result = manager.Issue(
-    reader,
-    books,
-    new DateTime(2026, 10, 1),
-    new DateTime(2026, 10, 20),
-    "student",
+    new IssueRequest(
+        reader,
+        books,
+        new DateTime(2026, 10, 1),
+        new DateTime(2026, 10, 20),
+        "student",
+        "demo"),
     sendEmail: true,
-    printReceipt: false,
-    operatorName: "demo");
+    printReceipt: false);
 
 Console.Write(result.Receipt);
 Console.Write(manager.DumpLog());
-

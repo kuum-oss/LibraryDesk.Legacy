@@ -22,30 +22,27 @@ public class LoanManager
         _repository = repository ?? new LoanRepository();
     }
 
-    public LoanResult Issue(
-        Reader? reader,
-        List<BookCopy>? books,
-        DateTime issuedOn,
-        DateTime? returnedOn,
-        string subscription,
-        bool sendEmail,
-        bool printReceipt,
-        string operatorName)
+    public LoanResult Issue(IssueRequest request, bool sendEmail, bool printReceipt)
     {
-        string error = ValidateIssue(reader, books);
+        string error = ValidateIssue(request.Reader, request.Books);
         if (error.Length > 0)
         {
             return new LoanResult { Error = error };
         }
 
-        int days = LoanDays(subscription, books!);
-        Loan loan = CreateLoan(reader!, books!, issuedOn, days, operatorName);
-        CompleteReturn(loan, returnedOn);
+        int days = LoanDays(request.Subscription, request.Books!);
+        Loan loan = CreateLoan(
+            request.Reader!,
+            request.Books!,
+            request.IssuedOn,
+            days,
+            request.OperatorName);
+        CompleteReturn(loan, request.ReturnedOn);
         string receipt = BuildReceipt(loan);
         SaveIgnoringFailure(loan);
-        SendEmailIfRequested(reader!, sendEmail);
+        SendEmailIfRequested(request.Reader!, sendEmail);
         PrintIfRequested(receipt, printReceipt);
-        reader!.ActiveLoans++;
+        request.Reader!.ActiveLoans++;
 
         return new LoanResult { Success = true, Loan = loan, Receipt = receipt };
     }
