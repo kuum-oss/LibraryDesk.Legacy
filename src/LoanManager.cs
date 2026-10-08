@@ -194,13 +194,16 @@ public class LoanManager
 
     public bool ChangeStatus(Loan loan, string next)
     {
+        bool canFinishActiveLoan = loan.Status == "active"
+            && (next == "returned" || next == "overdue" || next == "lost");
+
         if (loan.Status == "new" && next == "active")
         {
             loan.Status = next;
             return true;
         }
 
-        if (loan.Status == "active" && (next == "returned" || next == "overdue" || next == "lost"))
+        if (canFinishActiveLoan)
         {
             loan.Status = next;
             return true;
