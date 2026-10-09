@@ -1,0 +1,2 @@
+# Допоміжний скрипт відтворює метрики звіту, але не є кодом застосунку.
+tools/measure_metrics.py linguist-detectable=false
